@@ -370,12 +370,15 @@ body {
 .game-canvas-container {
   width: 100%;
   max-width: 900px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-md);
 }
 
 .game-hud {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -469,6 +472,7 @@ body {
 
 .canvas-wrapper {
   position: relative;
+  width: 100%;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), var(--shadow-cyan);
@@ -477,6 +481,8 @@ body {
 
 .game-canvas {
   display: block;
+  width: 100%;
+  height: auto;
   background: radial-gradient(ellipse at center, #0a0e27 0%, #000 100%);
   cursor: crosshair;
 }
@@ -683,6 +689,23 @@ body {
   align-items: center;
   width: 100%;
   max-width: 300px;
+}
+
+.reward-check {
+  display: block;
+  font-size: 0.7rem;
+  color: #00ff88;
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+.reward-pending {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--neon-gold);
+  margin-top: 4px;
+  letter-spacing: 1px;
+  animation: pulse 1.5s infinite;
 }
 
 .gameover-actions {
