@@ -91,6 +91,22 @@ export default function GameCanvas({ web3Data, selectedShip }) {
   const handleGameOver = useCallback(async (finalScore, finalLevel, difficulty) => {
     setGameState('gameover');
     
+    // Immediately calculate and show the reward
+    const diff = difficulty || 1;
+    const baseReward = finalScore * 0.001;
+    const levelMultiplier = 1 + (finalLevel - 1) * 0.1;
+    const difficultyBonus = diff * 0.5;
+    const calculatedReward = baseReward * levelMultiplier * (1 + difficultyBonus);
+    
+    if (finalScore > 0) {
+      // Show reward immediately (before blockchain confirmation)
+      setLastReward({
+        amount: parseFloat(calculatedReward.toFixed(6)),
+        verified: false,
+        status: 'claiming'
+      });
+    }
+
     if (!web3Data?.account || finalScore <= 0) return;
 
     try {
@@ -105,20 +121,31 @@ export default function GameCanvas({ web3Data, selectedShip }) {
       const result = await submitScoreHybrid({
         score: finalScore,
         level: finalLevel,
-        difficulty: difficulty || 1,
+        difficulty: diff,
         playerName: playerName || 'Anonymous',
         proof,
         gameContract
       });
 
-      if (result.verified || result.amount) {
-        setLastReward(result);
-      }
+      // Update reward with blockchain confirmation
+      setLastReward({
+        amount: result.amount || parseFloat(calculatedReward.toFixed(6)),
+        verified: result.verified,
+        txHash: result.txHash,
+        status: result.verified ? 'confirmed' : 'submitted'
+      });
+
       if (result.isNewHighScore) {
         setHighScore(finalScore);
       }
     } catch (error) {
       console.error('Score submission failed:', error);
+      // Keep showing the calculated reward even if submission fails
+      setLastReward({
+        amount: parseFloat(calculatedReward.toFixed(6)),
+        verified: false,
+        status: 'pending'
+      });
       // Fallback: submit to Firebase only
       try {
         await submitScoreToFirebase({
@@ -126,7 +153,7 @@ export default function GameCanvas({ web3Data, selectedShip }) {
           name: playerName || 'Anonymous',
           score: finalScore,
           level: finalLevel,
-          difficulty: difficulty || 1,
+          difficulty: diff,
           chainId: web3Data.chainId || 8119,
           isNewHighScore: finalScore > highScore
         });
@@ -359,10 +386,13 @@ export default function GameCanvas({ web3Data, selectedShip }) {
                 <span className="label">LEVEL REACHED</span>
                 <span className="value">{level}</span>
               </div>
-              {lastReward && (
+              {lastReward && lastReward.amount > 0 && (
                 <div className="final-stat reward">
-                  <span className="label">REWARD CLAIMED</span>
+                  <span className="label">REWARD {lastReward.status === 'confirmed' ? 'CLAIMED' : lastReward.status === 'claiming' ? 'CLAIMING...' : 'EARNED'}</span>
                   <span className="value gold">+{parseFloat(lastReward.amount).toFixed(4)} SPACE</span>
+                  {lastReward.status === 'confirmed' && <span className="reward-check">&#10003; On-chain</span>}
+                  {lastReward.status === 'claiming' && <span className="reward-pending">&#9889; Processing</span>}
+                  {lastReward.status === 'pending' && <span className="reward-pending">&#9889; Pending</span>}
                 </div>
               )}
             </div>
