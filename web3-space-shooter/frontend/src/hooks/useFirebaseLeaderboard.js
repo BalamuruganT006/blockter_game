@@ -171,7 +171,7 @@ export const useFirebaseLeaderboard = (web3Data) => {
     await submitScoreToFirebase({
       address,
       name: playerName,
-      score,
+      score,  
       level,
       difficulty,
       chainId: web3Data.chainId,
