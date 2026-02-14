@@ -178,6 +178,11 @@ export class GameEngine {
             // Enemy destroyed
             this.score += enemy.scoreValue;
             this.createExplosion(enemy.x, enemy.y, enemy.color);
+
+            // Notify kill event
+            if (this.callbacks.onEnemyKill) {
+              this.callbacks.onEnemyKill(enemy);
+            }
             
             // Chance to drop power-up
             if (Math.random() < 0.1) {
@@ -258,6 +263,9 @@ export class GameEngine {
       this.level = newLevel;
       this.difficulty = 1 + (this.level - 1) * 0.2;
       this.enemyTypes = this.getEnemyTypesForLevel(this.level);
+      if (this.callbacks.onLevelUp) {
+        this.callbacks.onLevelUp(this.level);
+      }
     }
   }
 
@@ -295,6 +303,9 @@ export class GameEngine {
   }
 
   applyPowerUp(type) {
+    if (this.callbacks.onPowerUp) {
+      this.callbacks.onPowerUp(type);
+    }
     switch(type) {
       case 'health':
         this.player.heal(30);

@@ -105,7 +105,7 @@ export default function Leaderboard({ web3Data, gameContract }) {
             <span>Games: {playerStats.gamesPlayed || 0}</span>
             {playerStats.txHash && (
               <a 
-                href={`https://explorer.shardeum.org/tx/${playerStats.txHash}`}
+                href={`https://explorer-mezame.shardeum.org/tx/${playerStats.txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="verified-link"
@@ -187,12 +187,22 @@ export default function Leaderboard({ web3Data, gameContract }) {
 
                 <span className="col-status">
                   {player.verified ? (
-                    <span className="status-badge verified" title="Verified on Shardeum">
+                    <a
+                      className="status-badge verified"
+                      href={`https://explorer-mezame.shardeum.org/tx/${player.txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Verified on Shardeum — click to view tx"
+                    >
                       ⛓ Verified
+                    </a>
+                  ) : player.txHash ? (
+                    <span className="status-badge pending" title="Blockchain confirmation in progress">
+                      🔄 Confirming
                     </span>
                   ) : (
-                    <span className="status-badge pending" title="Pending blockchain verification">
-                      ⚡ Pending
+                    <span className="status-badge saved" title="Saved to Firebase — awaiting blockchain sync">
+                      ✓ Saved
                     </span>
                   )}
                 </span>

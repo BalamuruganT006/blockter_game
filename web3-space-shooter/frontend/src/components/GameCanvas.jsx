@@ -21,6 +21,9 @@ export default function GameCanvas({ web3Data, selectedShip }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastReward, setLastReward] = useState(null);
   const [playerName, setPlayerName] = useState('');
+  const [showHelp, setShowHelp] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const notifIdRef = useRef(0);
   
   const { submitScore, getPlayerStats, getContracts } = useGameContract(
     web3Data?.signer, 
@@ -28,6 +31,15 @@ export default function GameCanvas({ web3Data, selectedShip }) {
   );
 
   const { leaderboard, submitScoreHybrid, submitScoreToFirebase } = useFirebaseLeaderboard(web3Data);
+
+  // Push a toast notification
+  const addNotification = useCallback((text, type = 'info') => {
+    const id = ++notifIdRef.current;
+    setNotifications(prev => [...prev.slice(-4), { id, text, type }]);
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }, 2200);
+  }, []);
 
   // Initialize blockchain submitters
   useEffect(() => {
@@ -79,7 +91,20 @@ export default function GameCanvas({ web3Data, selectedShip }) {
       },
       onLivesUpdate: (newLives) => setLives(newLives),
       onGameOver: handleGameOver,
-      onLevelUp: (newLevel) => setLevel(newLevel)
+      onLevelUp: (newLevel) => {
+        setLevel(newLevel);
+        addNotification(`LEVEL ${newLevel} REACHED!`, 'level');
+      },
+      onEnemyKill: (enemy) => {
+        const msgs = ['Enemy destroyed!', 'Target eliminated!', 'Kill confirmed!', 'Bogey down!'];
+        if (enemy && enemy.scoreValue >= 50) {
+          addNotification(`+${enemy.scoreValue} ${msgs[Math.floor(Math.random() * msgs.length)]}`, 'kill');
+        }
+      },
+      onPowerUp: (type) => {
+        const labels = { health: '❤️ Health Restored', speed: '⚡ Speed Boost', damage: '🔥 Damage Up', shield: '🛡️ Shield Active' };
+        addNotification(labels[type] || 'Power-Up!', 'powerup');
+      }
     });
     
     return () => {
@@ -293,6 +318,9 @@ export default function GameCanvas({ web3Data, selectedShip }) {
               />
             ))}
           </div>
+          <button className="help-toggle-btn" onClick={() => setShowHelp(h => !h)} title="Help &amp; Controls">
+            ?
+          </button>
           {web3Data?.account && (
             <div className="wallet-badge">
               <span className="pulse-dot"></span>
@@ -300,6 +328,56 @@ export default function GameCanvas({ web3Data, selectedShip }) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Help / Tutorial Panel */}
+      {showHelp && (
+        <div className="help-panel">
+          <div className="help-panel-inner">
+            <button className="help-close" onClick={() => setShowHelp(false)}>&times;</button>
+            <h3 className="help-title">HOW TO PLAY</h3>
+            <div className="help-section">
+              <h4>Controls</h4>
+              <div className="help-controls-grid">
+                <span className="hkey">&larr; &rarr;</span><span>Move ship left / right</span>
+                <span className="hkey">SPACE</span><span>Fire weapons</span>
+                <span className="hkey">ESC</span><span>Pause game</span>
+                <span className="hkey">N</span><span>New game (after game over)</span>
+              </div>
+            </div>
+            <div className="help-section">
+              <h4>Scoring</h4>
+              <ul>
+                <li>Destroy enemies to earn points</li>
+                <li>Harder enemies = more points</li>
+                <li>Every 500 pts advances your level</li>
+                <li>Higher levels spawn tougher enemies</li>
+              </ul>
+            </div>
+            <div className="help-section">
+              <h4>Power-Ups</h4>
+              <div className="help-controls-grid">
+                <span className="pu-icon" style={{color:'#ff4444'}}>&#10084;</span><span>Restores health</span>
+                <span className="pu-icon" style={{color:'#4444ff'}}>&#9889;</span><span>Speed boost</span>
+                <span className="pu-icon" style={{color:'#ffaa00'}}>&#128293;</span><span>Damage increase</span>
+                <span className="pu-icon" style={{color:'#44ff44'}}>&#128737;</span><span>Temporary shield</span>
+              </div>
+            </div>
+            <div className="help-section">
+              <h4>Rewards</h4>
+              <p>Connect your wallet to earn <strong>SPACE tokens</strong> on Shardeum when you set a new high score. Higher scores + levels = bigger rewards!</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Game Event Notifications */}
+      <div className="game-notifications">
+        {notifications.map(n => (
+          <div key={n.id} className={`game-notif game-notif-${n.type}`}>
+            {n.text}
+          </div>
+        ))}
       </div>
 
       {/* Game Canvas */}
