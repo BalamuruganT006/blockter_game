@@ -180,9 +180,17 @@ export const useFirebaseLeaderboard = (web3Data) => {
 
     // Step 3: If new high score, submit to blockchain (permanent)
     let txHash = null;
+    let rewardAmount = null;
     if (isNewHighScore) {
       try {
         const { ethers } = await import('ethers');
+
+        // Calculate expected reward
+        const baseReward = score * 0.001;
+        const levelMultiplier = 1 + (level - 1) * 0.1;
+        const difficultyBonus = (difficulty || 1) * 0.5;
+        rewardAmount = baseReward * levelMultiplier * (1 + difficultyBonus);
+
         const tx = await gameContract.submitScore(
           score,
           level,
@@ -217,7 +225,8 @@ export const useFirebaseLeaderboard = (web3Data) => {
       success: true,
       isNewHighScore,
       txHash,
-      verified: !!txHash
+      verified: !!txHash,
+      amount: rewardAmount ? parseFloat(rewardAmount.toFixed(6)) : null
     };
   }, [web3Data, submitScoreToFirebase, getPlayerStats]);
 

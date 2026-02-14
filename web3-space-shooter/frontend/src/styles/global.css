@@ -691,6 +691,77 @@ body {
   margin-top: var(--space-md);
 }
 
+/* Gameover Leaderboard */
+.gameover-leaderboard {
+  width: 100%;
+  max-width: 400px;
+  margin: var(--space-lg) auto var(--space-sm);
+  background: rgba(0, 10, 30, 0.8);
+  border: 1px solid var(--border-glow);
+  border-radius: 8px;
+  padding: var(--space-md);
+}
+
+.gameover-leaderboard .leaderboard-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem;
+  color: var(--neon-cyan);
+  text-align: center;
+  margin-bottom: var(--space-sm);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.leaderboard-mini .lb-row {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(0, 243, 255, 0.08);
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.leaderboard-mini .lb-row:last-child {
+  border-bottom: none;
+}
+
+.leaderboard-mini .lb-row.current {
+  background: rgba(0, 243, 255, 0.1);
+  border-left: 3px solid var(--neon-cyan);
+  border-radius: 4px;
+}
+
+.leaderboard-mini .lb-rank {
+  color: var(--neon-gold);
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  min-width: 35px;
+}
+
+.leaderboard-mini .lb-name {
+  flex: 1;
+  color: var(--text-primary);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-mini .lb-score {
+  color: var(--neon-cyan);
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.leaderboard-mini .lb-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding: var(--space-sm);
+}
+
 /* Game Footer */
 .game-footer {
   display: flex;
@@ -1326,6 +1397,16 @@ body {
   justify-content: center;
   position: relative;
   animation: float 3s ease-in-out infinite;
+  overflow: hidden;
+}
+
+.ship-img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 0 10px var(--tier-color));
 }
 
 .ship-glow {
@@ -1979,16 +2060,10 @@ body {
   text-transform: uppercase;
 }
 
-.chain-badge.chain-8118 {
+.chain-badge.chain-8119 {
   background: rgba(0, 243, 255, 0.2);
   color: var(--neon-cyan);
   border: 1px solid var(--neon-cyan);
-}
-
-.chain-badge.chain-8082 {
-  background: rgba(255, 215, 0, 0.2);
-  color: var(--neon-gold);
-  border: 1px solid var(--neon-gold);
 }
 
 .chain-badge.chain-unknown {

@@ -10,17 +10,11 @@
 export const OWNER_ADDRESS = "0x7dD916dB8562F32349D132342139FF8C5A389Eb8";
 
 export const CONTRACT_ADDRESSES = {
-  // Shardeum Testnet (Atomium)
-  8082: {
-    BlockterGame: "",    // Fill after deployment (ERC20 token + game logic)
-    NFTSpaceship: "",    // Fill after deployment
-    deployedAt: null
-  },
-  // Shardeum Mainnet
-  8118: {
-    BlockterGame: "",
-    NFTSpaceship: "",
-    deployedAt: null
+  // Shardeum EVM Testnet (Mezame)
+  8119: {
+    BlockterGame: "0x245A0364AEf9A8ef6eC8E83aaEC1Cd08fBb7f878",
+    NFTSpaceship: "",    // Fill after deploying NFTSpaceship
+    deployedAt: "2026-02-15"
   }
 };
 

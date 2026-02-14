@@ -18,6 +18,16 @@ import {
   increment,
   runTransaction
 } from 'firebase/firestore';
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  updateProfile
+} from 'firebase/auth';
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -44,6 +54,23 @@ try {
 }
 
 const db = getFirestore(app);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+
+// Auth functions
+const registerUser = (email, password) => 
+  createUserWithEmailAndPassword(auth, email, password);
+
+const loginUser = (email, password) => 
+  signInWithEmailAndPassword(auth, email, password);
+
+const logoutUser = () => signOut(auth);
+
+const signInWithGoogleAuth = () => 
+  signInWithPopup(auth, googleProvider);
+
+const updateUserProfile = (user, displayName) =>
+  updateProfile(user, { displayName });
 
 // Test Firebase connection
 console.log('🔥 Firebase initialized with config:');
@@ -68,6 +95,14 @@ export {
   app,
   analytics,
   db,
+  auth,
+  googleProvider,
+  registerUser,
+  loginUser,
+  logoutUser,
+  signInWithGoogleAuth,
+  updateUserProfile,
+  onAuthStateChanged,
   collection,
   doc,
   setDoc,

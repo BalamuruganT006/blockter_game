@@ -50,7 +50,7 @@ export default function WalletConnect({ onConnect }) {
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x1FB6' }] // Shardeum Mainnet
+        params: [{ chainId: '0x1FB7' }] // Shardeum EVM Testnet (Mezame)
       });
     } catch (error) {
       console.error('Failed to switch network:', error);
@@ -125,7 +125,7 @@ export default function WalletConnect({ onConnect }) {
           <div className="dropdown-header">
             <span className="network-status">
               <span className={`status-dot ${isCorrectNetwork() ? 'green' : 'red'}`}></span>
-              {chainId === 8118 ? 'Shardeum Mainnet' : chainId === 8082 ? 'Shardeum Testnet' : 'Unknown Network'}
+              {chainId === 8119 ? 'Shardeum EVM Testnet' : 'Unknown Network'}
             </span>
           </div>
           
@@ -141,7 +141,7 @@ export default function WalletConnect({ onConnect }) {
           
           <a 
             className="dropdown-item"
-            href={`https://explorer.shardeum.org/address/${account}`}
+            href={`https://explorer-mezame.shardeum.org/address/${account}`}
             target="_blank"
             rel="noopener noreferrer"
           >

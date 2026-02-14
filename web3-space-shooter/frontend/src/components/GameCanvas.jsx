@@ -27,7 +27,7 @@ export default function GameCanvas({ web3Data, selectedShip }) {
     web3Data?.chainId
   );
 
-  const { submitScoreHybrid, submitScoreToFirebase } = useFirebaseLeaderboard(web3Data);
+  const { leaderboard, submitScoreHybrid, submitScoreToFirebase } = useFirebaseLeaderboard(web3Data);
 
   // Initialize blockchain submitters
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function GameCanvas({ web3Data, selectedShip }) {
         gameContract
       });
 
-      if (result.verified) {
+      if (result.verified || result.amount) {
         setLastReward(result);
       }
       if (result.isNewHighScore) {
@@ -127,7 +127,7 @@ export default function GameCanvas({ web3Data, selectedShip }) {
           score: finalScore,
           level: finalLevel,
           difficulty: difficulty || 1,
-          chainId: web3Data.chainId || 8082,
+          chainId: web3Data.chainId || 8119,
           isNewHighScore: finalScore > highScore
         });
       } catch (fbErr) {
@@ -201,7 +201,7 @@ export default function GameCanvas({ web3Data, selectedShip }) {
           score: scoreToSubmit,
           level,
           difficulty: 1,
-          chainId: web3Data.chainId || 8082,
+          chainId: web3Data.chainId || 8119,
           isNewHighScore: scoreToSubmit > highScore
         });
         alert('Score submitted to Firebase! (Blockchain sync pending)');
@@ -362,7 +362,7 @@ export default function GameCanvas({ web3Data, selectedShip }) {
               {lastReward && (
                 <div className="final-stat reward">
                   <span className="label">REWARD CLAIMED</span>
-                  <span className="value gold">+{lastReward.amount} SPACE</span>
+                  <span className="value gold">+{parseFloat(lastReward.amount).toFixed(4)} SPACE</span>
                 </div>
               )}
             </div>
@@ -387,6 +387,24 @@ export default function GameCanvas({ web3Data, selectedShip }) {
                 </button>
               </div>
             )}
+
+            {/* Leaderboard in Game Over */}
+            <div className="gameover-leaderboard">
+              <h3 className="leaderboard-title">TOP PLAYERS</h3>
+              <div className="leaderboard-mini">
+                {leaderboard.length > 0 ? (
+                  leaderboard.slice(0, 5).map((entry, i) => (
+                    <div key={entry.id || i} className={`lb-row ${entry.isCurrentPlayer ? 'current' : ''}`}>
+                      <span className="lb-rank">#{i + 1}</span>
+                      <span className="lb-name">{entry.name || 'Anonymous'}</span>
+                      <span className="lb-score">{(entry.score || 0).toLocaleString()}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="lb-empty">No scores yet. Be the first!</p>
+                )}
+              </div>
+            </div>
             
             <div className="gameover-actions">
               <button className="cyber-btn primary" onClick={startGame}>
@@ -411,7 +429,7 @@ export default function GameCanvas({ web3Data, selectedShip }) {
         </div>
         {web3Data?.account && (
           <div className="network-info">
-            <span className="network-badge">Shardeum {web3Data.chainId === 8118 ? 'Mainnet' : 'Testnet'}</span>
+            <span className="network-badge">Shardeum {web3Data.chainId === 8119 ? 'Testnet' : 'Unknown'}</span>
           </div>
         )}
       </div>

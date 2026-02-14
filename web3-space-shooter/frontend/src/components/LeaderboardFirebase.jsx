@@ -5,16 +5,16 @@ import { useFirebase } from '../hooks/useFirebase';
 
 // Mock leaderboard data for testing (until Firebase is configured)
 const MOCK_LEADERBOARD = [
-  { address: '0x1234567890123456789012345678901234567890', name: 'CyberNinja', score: 5420, games: 24, earned: '125.50', chainId: 8118 },
-  { address: '0x2345678901234567890123456789012345678901', name: 'SpaceAce', score: 4890, games: 18, earned: '98.30', chainId: 8118 },
-  { address: '0x3456789012345678901234567890123456789012', name: 'NovaStrike', score: 4350, games: 16, earned: '87.60', chainId: 8082 },
-  { address: '0x4567890123456789012345678901234567890123', name: 'QuantumRider', score: 3920, games: 14, earned: '76.45', chainId: 8118 },
-  { address: '0x5678901234567890123456789012345678901234', name: 'PhantomFlash', score: 3540, games: 13, earned: '65.20', chainId: 8082 },
-  { address: '0x6789012345678901234567890123456789012345', name: 'VortexPilot', score: 3180, games: 11, earned: '54.10', chainId: 8118 },
-  { address: '0x7890123456789012345678901234567890123456', name: 'SonicBurst', score: 2890, games: 10, earned: '45.75', chainId: 8118 },
-  { address: '0x8901234567890123456789012345678901234567', name: 'IceBreaker', score: 2450, games: 9, earned: '38.90', chainId: 8082 },
-  { address: '0x9012345678901234567890123456789012345678', name: 'BlazeFury', score: 2120, games: 8, earned: '32.15', chainId: 8118 },
-  { address: '0xa123456789012345678901234567890123456789', name: 'StormChaser', score: 1890, games: 7, earned: '28.50', chainId: 8082 }
+  { address: '0x1234567890123456789012345678901234567890', name: 'CyberNinja', score: 5420, games: 24, earned: '125.50', chainId: 8119 },
+  { address: '0x2345678901234567890123456789012345678901', name: 'SpaceAce', score: 4890, games: 18, earned: '98.30', chainId: 8119 },
+  { address: '0x3456789012345678901234567890123456789012', name: 'NovaStrike', score: 4350, games: 16, earned: '87.60', chainId: 8119 },
+  { address: '0x4567890123456789012345678901234567890123', name: 'QuantumRider', score: 3920, games: 14, earned: '76.45', chainId: 8119 },
+  { address: '0x5678901234567890123456789012345678901234', name: 'PhantomFlash', score: 3540, games: 13, earned: '65.20', chainId: 8119 },
+  { address: '0x6789012345678901234567890123456789012345', name: 'VortexPilot', score: 3180, games: 11, earned: '54.10', chainId: 8119 },
+  { address: '0x7890123456789012345678901234567890123456', name: 'SonicBurst', score: 2890, games: 10, earned: '45.75', chainId: 8119 },
+  { address: '0x8901234567890123456789012345678901234567', name: 'IceBreaker', score: 2450, games: 9, earned: '38.90', chainId: 8119 },
+  { address: '0x9012345678901234567890123456789012345678', name: 'BlazeFury', score: 2120, games: 8, earned: '32.15', chainId: 8119 },
+  { address: '0xa123456789012345678901234567890123456789', name: 'StormChaser', score: 1890, games: 7, earned: '28.50', chainId: 8119 }
 ];
 
 export default function Leaderboard({ web3Data }) {

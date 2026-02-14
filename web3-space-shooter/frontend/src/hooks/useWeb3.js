@@ -2,21 +2,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
 
-const SHARDEUM_CONFIG = {
-  chainId: '0x1FB6', // 8118 in hex
-  chainName: 'Shardeum Mainnet',
-  rpcUrls: ['https://api.shardeum.org'],
-  nativeCurrency: {
-    name: 'Shardeum',
-    symbol: 'SHM',
-    decimals: 18
-  }
-};
-
 const SHARDEUM_TESTNET = {
-  chainId: '0x1F92', // 8082 in hex
-  chainName: 'Shardeum Atomium Testnet',
-  rpcUrls: ['https://api.shardeum.io'],
+  chainId: '0x1FB7', // 8119 in hex
+  chainName: 'Shardeum EVM Testnet',
+  rpcUrls: ['https://api-mezame.shardeum.org'],
+  blockExplorerUrls: ['https://explorer-mezame.shardeum.org'],
   nativeCurrency: {
     name: 'Shardeum',
     symbol: 'SHM',
@@ -40,7 +30,7 @@ export const useWeb3 = () => {
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: SHARDEUM_CONFIG.chainId }]
+        params: [{ chainId: SHARDEUM_TESTNET.chainId }]
       });
     } catch (switchError) {
       // Chain not added, add it
@@ -48,7 +38,7 @@ export const useWeb3 = () => {
         try {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
-            params: [SHARDEUM_CONFIG]
+            params: [SHARDEUM_TESTNET]
           });
         } catch (addError) {
           throw new Error('Failed to add Shardeum network');
@@ -139,7 +129,7 @@ export const useWeb3 = () => {
   }, [provider, account]);
 
   const isCorrectNetwork = () => {
-    return chainId === 8118 || chainId === 8082; // Mainnet or Testnet
+    return chainId === 8119; // Shardeum EVM Testnet (Mezame)
   };
 
   return {

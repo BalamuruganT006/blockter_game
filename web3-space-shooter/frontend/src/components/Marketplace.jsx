@@ -4,10 +4,10 @@ import { useGameContract } from '../hooks/useGameContract';
 import { ethers } from 'ethers';
 
 const SHIP_TIERS = [
-  { id: 'common', name: 'Scout', price: '0.01', color: '#6b7280', stats: { speed: 5, health: 5, fireRate: 5, damage: 5 } },
-  { id: 'rare', name: 'Fighter', price: '0.05', color: '#3b82f6', stats: { speed: 7, health: 7, fireRate: 6, damage: 7 } },
-  { id: 'epic', name: 'Destroyer', price: '0.1', color: '#a855f7', stats: { speed: 8, health: 9, fireRate: 7, damage: 8 } },
-  { id: 'legendary', name: 'Titan', price: '0.5', color: '#f59e0b', stats: { speed: 10, health: 10, fireRate: 10, damage: 10 } }
+  { id: 'common', name: 'Scout', price: '0.01', color: '#6b7280', image: '/images/ships/scout-ufo.png', stats: { speed: 5, health: 5, fireRate: 5, damage: 5 } },
+  { id: 'rare', name: 'Fighter', price: '0.05', color: '#3b82f6', image: '/images/ships/viper-rocket.png', stats: { speed: 7, health: 7, fireRate: 6, damage: 7 } },
+  { id: 'epic', name: 'Destroyer', price: '0.1', color: '#a855f7', image: '/images/ships/destroyer-satellite.png', stats: { speed: 8, health: 9, fireRate: 7, damage: 8 } },
+  { id: 'legendary', name: 'Titan', price: '0.5', color: '#f59e0b', image: '/images/ships/titan-invader.png', stats: { speed: 10, health: 10, fireRate: 10, damage: 10 } }
 ];
 
 export default function Marketplace({ web3Data, onSelectShip, selectedShip }) {
@@ -117,6 +117,7 @@ export default function Marketplace({ web3Data, onSelectShip, selectedShip }) {
             >
               <div className="ship-preview">
                 <div className="ship-model" style={{ borderColor: tier.color }}>
+                  <img src={tier.image} alt={tier.name} className="ship-img" />
                   <div className="ship-glow" style={{ background: tier.color }}></div>
                 </div>
                 <div className="tier-badge" style={{ background: tier.color }}>
@@ -229,7 +230,7 @@ export default function Marketplace({ web3Data, onSelectShip, selectedShip }) {
                   
                   <div className="card-actions">
                     <a 
-                      href={`https://explorer.shardeum.org/token/${ship.tokenId}`}
+                      href={`https://explorer-mezame.shardeum.org/token/${ship.tokenId}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="action-link"

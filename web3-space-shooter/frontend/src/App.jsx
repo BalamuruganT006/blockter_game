@@ -4,10 +4,12 @@ import WalletConnect from './components/WalletConnect';
 import GameCanvas from './components/GameCanvas';
 import Leaderboard from './components/LeaderboardNew';
 import Marketplace from './components/Marketplace';
+import LandingPage from './components/LandingPage';
 import { useGameContract } from './hooks/useGameContract';
 import './styles/global.css';
 
 function App() {
+  const [showGame, setShowGame] = useState(false);
   const [web3Data, setWeb3Data] = useState(null);
   const [selectedShip, setSelectedShip] = useState(null);
   const [activeTab, setActiveTab] = useState('play');
@@ -24,6 +26,15 @@ function App() {
     if (data?.account) {
       console.log('Connected:', data.account);
     }
+  };
+
+  const handleEnterGame = () => {
+    setShowGame(true);
+    window.scrollTo(0, 0);
+  };
+
+  const handleBackToLanding = () => {
+    setShowGame(false);
   };
 
   // Get game contract instance for leaderboard sync
@@ -48,10 +59,28 @@ function App() {
     );
   }
 
+  // Show landing page when not in game mode
+  if (!showGame) {
+    return <LandingPage onEnterGame={handleEnterGame} />;
+  }
+
   return (
     <div className="app scanlines">
       <header className="app-header">
         <div className="logo">
+          <button className="back-btn" onClick={handleBackToLanding} style={{
+            padding: '0.5rem 1rem',
+            background: 'transparent',
+            border: '1px solid rgba(255,255,255,0.3)',
+            color: '#fff',
+            fontFamily: 'Orbitron, sans-serif',
+            fontSize: '0.8rem',
+            cursor: 'pointer',
+            borderRadius: '6px',
+            marginRight: '1rem'
+          }}>
+            ← HOME
+          </button>
           <span className="logo-icon">🚀</span>
           <div className="logo-text">
             <h1>SPACE SHOOTER</h1>
@@ -117,10 +146,10 @@ function App() {
             <a href="https://docs.shardeum.org" target="_blank" rel="noopener noreferrer">
               Documentation
             </a>
-            <a href="https://explorer.shardeum.org" target="_blank" rel="noopener noreferrer">
+            <a href="https://explorer-mezame.shardeum.org" target="_blank" rel="noopener noreferrer">
               Explorer
             </a>
-            <a href="https://faucet.shardeum.org" target="_blank" rel="noopener noreferrer">
+            <a href="https://faucet-mezame.shardeum.org" target="_blank" rel="noopener noreferrer">
               Faucet
             </a>
           </div>
