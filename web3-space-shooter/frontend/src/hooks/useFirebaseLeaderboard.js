@@ -167,6 +167,12 @@ export const useFirebaseLeaderboard = (web3Data) => {
     const currentHigh = currentStats?.score || 0;
     const isNewHighScore = score > currentHigh;
 
+    // Always calculate the reward amount for display
+    const baseReward = score * 0.001;
+    const levelMultiplier = 1 + (level - 1) * 0.1;
+    const difficultyBonus = (difficulty || 1) * 0.5;
+    const rewardAmount = baseReward * levelMultiplier * (1 + difficultyBonus);
+
     // Step 2: Submit to Firebase immediately (fast feedback)
     await submitScoreToFirebase({
       address,
@@ -178,18 +184,11 @@ export const useFirebaseLeaderboard = (web3Data) => {
       isNewHighScore
     });
 
-    // Step 3: If new high score, submit to blockchain (permanent)
+    // Step 3: If new high score, submit to blockchain (permanent + token reward)
     let txHash = null;
-    let rewardAmount = null;
     if (isNewHighScore) {
       try {
         const { ethers } = await import('ethers');
-
-        // Calculate expected reward
-        const baseReward = score * 0.001;
-        const levelMultiplier = 1 + (level - 1) * 0.1;
-        const difficultyBonus = (difficulty || 1) * 0.5;
-        rewardAmount = baseReward * levelMultiplier * (1 + difficultyBonus);
 
         const tx = await gameContract.submitScore(
           score,
