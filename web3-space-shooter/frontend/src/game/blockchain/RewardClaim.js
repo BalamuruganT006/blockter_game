@@ -2,8 +2,8 @@
 import { ethers } from 'ethers';
 
 export class RewardClaimer {
-  constructor(tokenContract, gameContract, signer) {
-    this.tokenContract = tokenContract;
+  constructor(gameContract, signer) {
+    // BlockterGame is now both the token and game contract
     this.gameContract = gameContract;
     this.signer = signer;
   }
@@ -27,10 +27,8 @@ export class RewardClaimer {
 
   async claimRewards(score, level, difficulty) {
     try {
-      // Check if contracts are deployed and valid
-      if (!this.tokenContract || !this.tokenContract.address || 
-          this.tokenContract.address === '0x...' ||
-          !this.gameContract || !this.gameContract.address ||
+      // Check if contract is deployed and valid
+      if (!this.gameContract || !this.gameContract.address || 
           this.gameContract.address === '0x...') {
         console.warn('Contracts not deployed, returning mock reward');
         
@@ -61,11 +59,11 @@ export class RewardClaimer {
       // Calculate reward
       const rewardAmount = this.calculateReward(score, level, difficulty);
       
-      // Check contract balance
+      // Check contract token stats
       let contractBalance;
       try {
-        contractBalance = await this.tokenContract.balanceOf(
-          await this.tokenContract.getAddress()
+        contractBalance = await this.gameContract.balanceOf(
+          await this.gameContract.getAddress()
         );
       } catch (balanceError) {
         console.warn('Could not check contract balance:', balanceError);
@@ -79,27 +77,24 @@ export class RewardClaimer {
         };
       }
 
-      // Claim reward
-      const tx = await this.tokenContract.rewardPlayer(address, score, {
-        gasLimit: 150000
-      });
+      // Rewards are now auto-minted during submitScore in BlockterGame
+      // This is kept for checking reward status
+      const tx = await this.gameContract.getTokenStats(address);
       
       const receipt = await tx.wait();
       
-      // Get new balance
+      // Get current balance from the unified contract
       let newBalance;
       try {
-        newBalance = await this.tokenContract.balanceOf(address);
+        newBalance = await this.gameContract.balanceOf(address);
       } catch (newBalanceError) {
         newBalance = rewardAmount;
       }
       
       return {
         success: true,
-        txHash: tx.hash,
         amount: ethers.formatEther(rewardAmount),
-        newBalance: ethers.formatEther(newBalance),
-        blockNumber: receipt.blockNumber
+        newBalance: ethers.formatEther(newBalance)
       };
 
     } catch (error) {
@@ -116,7 +111,7 @@ export class RewardClaimer {
   async checkPendingRewards(address) {
     try {
       const stats = await this.gameContract.getPlayerStats(address);
-      const balance = await this.tokenContract.balanceOf(address);
+      const balance = await this.gameContract.balanceOf(address);
       
       return {
         gamesPlayed: Number(stats.gamesPlayed),

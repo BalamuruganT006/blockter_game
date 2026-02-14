@@ -2,8 +2,9 @@
 import { useState, useEffect } from 'react';
 import WalletConnect from './components/WalletConnect';
 import GameCanvas from './components/GameCanvas';
-import Leaderboard from './components/Leaderboard';
+import Leaderboard from './components/LeaderboardNew';
 import Marketplace from './components/Marketplace';
+import { useGameContract } from './hooks/useGameContract';
 import './styles/global.css';
 
 function App() {
@@ -24,6 +25,11 @@ function App() {
       console.log('Connected:', data.account);
     }
   };
+
+  // Get game contract instance for leaderboard sync
+  const { getContracts } = useGameContract(web3Data?.signer, web3Data?.chainId);
+  const contracts = web3Data?.signer ? getContracts() : null;
+  const gameContract = contracts?.game || null;
 
   const handleSelectShip = (ship) => {
     setSelectedShip(ship);
@@ -89,7 +95,7 @@ function App() {
         )}
         
         {activeTab === 'leaderboard' && (
-          <Leaderboard web3Data={web3Data} />
+          <Leaderboard web3Data={web3Data} gameContract={gameContract} />
         )}
         
         {activeTab === 'marketplace' && (

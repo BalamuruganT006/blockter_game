@@ -1,9 +1,11 @@
 // src/components/GameCanvas.jsx
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { ethers } from 'ethers';
 import { GameEngine } from '../game/engine/GameLoop';
 import { ScoreSubmitter } from '../game/blockchain/ScoreSubmit';
 import { RewardClaimer } from '../game/blockchain/RewardClaim';
 import { useGameContract } from '../hooks/useGameContract';
+import { useFirebaseLeaderboard } from '../hooks/useFirebaseLeaderboard';
 
 export default function GameCanvas({ web3Data, selectedShip }) {
   const canvasRef = useRef(null);
@@ -25,13 +27,14 @@ export default function GameCanvas({ web3Data, selectedShip }) {
     web3Data?.chainId
   );
 
+  const { submitScoreHybrid, submitScoreToFirebase } = useFirebaseLeaderboard(web3Data);
+
   // Initialize blockchain submitters
   useEffect(() => {
     if (web3Data?.signer && getContracts()) {
       const contracts = getContracts();
       submitterRef.current = new ScoreSubmitter(contracts.game, web3Data.signer);
       rewarderRef.current = new RewardClaimer(
-        contracts.token, 
         contracts.game, 
         web3Data.signer
       );
@@ -88,28 +91,50 @@ export default function GameCanvas({ web3Data, selectedShip }) {
   const handleGameOver = useCallback(async (finalScore, finalLevel, difficulty) => {
     setGameState('gameover');
     
-    // Claim rewards if connected
-    if (rewarderRef.current && finalScore > 0) {
+    if (!web3Data?.account || finalScore <= 0) return;
+
+    try {
+      // Generate proof
+      const proof = ethers.keccak256(ethers.toUtf8Bytes(
+        `${web3Data.account}-${finalScore}-${Date.now()}`
+      ));
+
+      const contracts = getContracts();
+      const gameContract = contracts?.game || null;
+
+      const result = await submitScoreHybrid({
+        score: finalScore,
+        level: finalLevel,
+        difficulty: difficulty || 1,
+        playerName: playerName || 'Anonymous',
+        proof,
+        gameContract
+      });
+
+      if (result.verified) {
+        setLastReward(result);
+      }
+      if (result.isNewHighScore) {
+        setHighScore(finalScore);
+      }
+    } catch (error) {
+      console.error('Score submission failed:', error);
+      // Fallback: submit to Firebase only
       try {
-        const result = await rewarderRef.current.claimRewards(
-          finalScore,
-          finalLevel,
-          difficulty
-        );
-        
-        if (result.success) {
-          setLastReward(result);
-        }
-      } catch (error) {
-        console.error('Reward claim failed:', error);
+        await submitScoreToFirebase({
+          address: web3Data.account,
+          name: playerName || 'Anonymous',
+          score: finalScore,
+          level: finalLevel,
+          difficulty: difficulty || 1,
+          chainId: web3Data.chainId || 8082,
+          isNewHighScore: finalScore > highScore
+        });
+      } catch (fbErr) {
+        console.error('Firebase fallback failed:', fbErr);
       }
     }
-    
-    // Auto-submit score if it's a high score
-    if (submitterRef.current && finalScore > highScore) {
-      await handleSubmitScore(finalScore);
-    }
-  }, [highScore]);
+  }, [web3Data, highScore, playerName, submitScoreHybrid, submitScoreToFirebase, getContracts]);
 
   const startGame = () => {
     if (!engineRef.current) return;
@@ -138,20 +163,58 @@ export default function GameCanvas({ web3Data, selectedShip }) {
   };
 
   const handleSubmitScore = async (scoreToSubmit = score) => {
-    if (!submitterRef.current || !playerName) return;
+    if (!playerName) {
+      alert('Please enter your name first!');
+      return;
+    }
     
     setIsSubmitting(true);
+    
     try {
-      const result = await submitterRef.current.submitScore(scoreToSubmit, playerName);
-      
-      if (result.success) {
-        setHighScore(scoreToSubmit);
-        alert(`New high score submitted! TX: ${result.txHash.slice(0, 10)}...`);
+      const proof = ethers.keccak256(ethers.toUtf8Bytes(
+        `${web3Data?.account || 'anon'}-${scoreToSubmit}-${Date.now()}`
+      ));
+
+      const contracts = getContracts();
+
+      if (web3Data?.account && contracts?.game) {
+        // Full hybrid: Firebase + blockchain
+        const result = await submitScoreHybrid({
+          score: scoreToSubmit,
+          level,
+          difficulty: 1,
+          playerName,
+          proof,
+          gameContract: contracts.game
+        });
+
+        const messages = ['✓ Firebase'];
+        if (result.verified) messages.push('⛓ Blockchain');
+        alert(`Score submitted! ${messages.join(' & ')}\n\nYour score has been recorded!`);
+
+        if (result.isNewHighScore) setHighScore(scoreToSubmit);
+      } else if (web3Data?.account) {
+        // Firebase only (no contract deployed yet)
+        await submitScoreToFirebase({
+          address: web3Data.account,
+          name: playerName,
+          score: scoreToSubmit,
+          level,
+          difficulty: 1,
+          chainId: web3Data.chainId || 8082,
+          isNewHighScore: scoreToSubmit > highScore
+        });
+        alert('Score submitted to Firebase! (Blockchain sync pending)');
+        if (scoreToSubmit > highScore) setHighScore(scoreToSubmit);
       } else {
-        console.log('Score submission:', result.reason);
+        alert('Connect wallet to save scores.');
       }
+
+      setGameState('menu');
+      setScore(0);
     } catch (error) {
       console.error('Submit error:', error);
+      alert('Error submitting score. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

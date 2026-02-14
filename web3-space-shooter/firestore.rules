@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Leaderboard - public read, authenticated write
+    match /leaderboard/{address} {
+      allow read: if true;
+      allow write: if request.auth != null 
+        && request.auth.uid == address
+        && request.resource.data.score >= 0
+        && request.resource.data.score <= 999999999;
+    }
+    
+    // Player profiles - public read, owner write
+    match /players/{address} {
+      allow read: if true;
+      allow write: if request.auth != null 
+        && request.auth.uid == address;
+    }
+    
+    // Sync logs - admin only
+    match /syncLogs/{logId} {
+      allow read: if request.auth != null 
+        && request.auth.token.admin == true;
+      allow write: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+  }
+}
