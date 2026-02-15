@@ -10,8 +10,8 @@ export class Bullet {
     this.owner = owner; // 'player' or 'enemy'
     this.color = color;
     
-    this.width = 6;
-    this.height = 15;
+    this.width = 4;
+    this.height = 10;
     this.active = true;
     this.trail = [];
   }

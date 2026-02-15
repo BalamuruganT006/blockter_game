@@ -9,8 +9,8 @@ export class Player {
     // Position
     this.x = x;
     this.y = y;
-    this.width = 50;
-    this.height = 50;
+    this.width = 30;
+    this.height = 30;
     
     // Movement
     this.speed = shipStats?.speed ? shipStats.speed * 3 : 5;
@@ -73,7 +73,7 @@ export class Player {
         x: this.x,
         y: this.y + this.height/2,
         life: 1.0,
-        size: Math.random() * 5 + 3
+        size: Math.random() * 3 + 2
       });
     }
     
@@ -159,7 +159,7 @@ export class Player {
     
     // Main body
     this.ctx.fillStyle = this.color;
-    this.ctx.shadowBlur = 20;
+    this.ctx.shadowBlur = 12;
     this.ctx.shadowColor = this.color;
     
     this.ctx.beginPath();
@@ -173,13 +173,13 @@ export class Player {
     // Cockpit
     this.ctx.fillStyle = '#ffffff';
     this.ctx.beginPath();
-    this.ctx.arc(this.x, this.y - 5, 8, 0, Math.PI * 2);
+    this.ctx.arc(this.x, this.y - 3, 5, 0, Math.PI * 2);
     this.ctx.fill();
     
     // Engine glow
     this.ctx.fillStyle = `rgba(0, 243, 255, ${0.5 + this.enginePower * 0.5})`;
     this.ctx.beginPath();
-    this.ctx.arc(this.x, this.y + this.height/3, 12 + this.enginePower * 5, 0, Math.PI * 2);
+    this.ctx.arc(this.x, this.y + this.height/3, 7 + this.enginePower * 3, 0, Math.PI * 2);
     this.ctx.fill();
     
     this.ctx.restore();

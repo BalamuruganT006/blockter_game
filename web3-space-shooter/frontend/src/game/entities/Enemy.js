@@ -8,10 +8,10 @@ export class Enemy {
     this.type = type;
     
     // Position - spawn at random x, above screen
-    this.x = Math.random() * (canvas.width - 40) + 20;
-    this.y = -50;
-    this.width = 40;
-    this.height = 40;
+    this.x = Math.random() * (canvas.width - 30) + 15;
+    this.y = -30;
+    this.width = 25;
+    this.height = 25;
     
     // Stats based on type
     const types = {
@@ -127,7 +127,7 @@ export class Enemy {
     this.ctx.save();
     
     // Glow effect
-    this.ctx.shadowBlur = 15;
+    this.ctx.shadowBlur = 8;
     this.ctx.shadowColor = this.color;
     
     // Pulsing size
@@ -209,7 +209,7 @@ export class Enemy {
     this.ctx.beginPath();
     for (let i = 0; i < 6; i++) {
       const angle = (i / 6) * Math.PI * 2;
-      const r = this.width/2 + pulse + (i % 2 === 0 ? 10 : 0);
+      const r = this.width/2 + pulse + (i % 2 === 0 ? 6 : 0);
       const x = this.x + Math.cos(angle) * r;
       const y = this.y + Math.sin(angle) * r;
       if (i === 0) this.ctx.moveTo(x, y);
@@ -221,7 +221,7 @@ export class Enemy {
 
   drawHealthBar() {
     const barWidth = this.width;
-    const barHeight = 4;
+    const barHeight = 3;
     const healthPercent = this.health / this.maxHealth;
     
     this.ctx.fillStyle = '#333';
