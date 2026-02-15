@@ -3,15 +3,16 @@ import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 
 export default defineConfig({
+    root: "frontend",
     plugins: [react()],
     resolve: {
         alias: {
-            "@": resolve(__dirname, "src"),
-            "@components": resolve(__dirname, "src/components"),
-            "@hooks": resolve(__dirname, "src/hooks"),
-            "@game": resolve(__dirname, "src/game"),
-            "@styles": resolve(__dirname, "src/styles"),
-            "@utils": resolve(__dirname, "src/utils")
+            "@": resolve(__dirname, "frontend/src"),
+            "@components": resolve(__dirname, "frontend/src/components"),
+            "@hooks": resolve(__dirname, "frontend/src/hooks"),
+            "@game": resolve(__dirname, "frontend/src/game"),
+            "@styles": resolve(__dirname, "frontend/src/styles"),
+            "@utils": resolve(__dirname, "frontend/src/utils")
         }
     },
     server: {
@@ -20,7 +21,8 @@ export default defineConfig({
         host: true
     },
     build: {
-        outDir: "dist",
+        outDir: "../dist",
+        emptyOutDir: true,
         sourcemap: true,
         minify: "terser",
         terserOptions: {
