@@ -26,11 +26,11 @@
   --text-muted: rgba(255, 255, 255, 0.5);
 
   /* Spacing */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
+  --space-xs: 0.15rem;
+  --space-sm: 0.35rem;
+  --space-md: 0.7rem;
+  --space-lg: 1rem;
+  --space-xl: 1.4rem;
 
   /* Shadows */
   --shadow-cyan: 0 0 20px rgba(0, 243, 255, 0.3);
@@ -51,7 +51,7 @@
 }
 
 html {
-  font-size: 16px;
+  font-size: 13px;
   scroll-behavior: smooth;
 }
 
@@ -144,12 +144,12 @@ body {
 
 .cyber-btn {
   position: relative;
-  padding: var(--space-md) var(--space-xl);
+  padding: var(--space-sm) var(--space-lg);
   background: transparent;
-  border: 2px solid var(--neon-cyan);
+  border: 1px solid var(--neon-cyan);
   color: var(--neon-cyan);
   font-family: "Orbitron", sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -246,7 +246,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-md) var(--space-xl);
+  padding: var(--space-sm) var(--space-lg);
   background: rgba(5, 8, 20, 0.95);
   border-bottom: 1px solid var(--border-glow);
   backdrop-filter: blur(10px);
@@ -262,7 +262,7 @@ body {
 }
 
 .logo-icon {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   filter: drop-shadow(0 0 15px var(--neon-cyan));
   animation: float 3s ease-in-out infinite;
 }
@@ -278,7 +278,7 @@ body {
 }
 
 .logo h1 {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 900;
   letter-spacing: 3px;
   background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
@@ -308,12 +308,12 @@ body {
 }
 
 .app-nav button {
-  padding: var(--space-md) var(--space-xl);
+  padding: var(--space-sm) var(--space-lg);
   background: transparent;
   border: none;
   color: var(--text-muted);
   font-family: "Orbitron", sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -351,7 +351,7 @@ body {
 
 .app-main {
   flex: 1;
-  padding: var(--space-xl);
+  padding: var(--space-md);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -369,12 +369,12 @@ body {
 /* ==================== GAME CANVAS ==================== */
 .game-canvas-container {
   width: 100%;
-  max-width: 900px;
+  max-width: 580px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-sm);
 }
 
 .game-hud {
@@ -382,10 +382,10 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-md) var(--space-lg);
+  padding: var(--space-sm) var(--space-md);
   background: var(--bg-panel);
   border: 1px solid var(--border-glow);
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: var(--shadow-cyan);
 }
 
@@ -413,7 +413,7 @@ body {
 }
 
 .stat-value {
-  font-size: 1.8rem;
+  font-size: 1.1rem;
   font-weight: 700;
   font-family: "Rajdhani", monospace;
 }
@@ -431,7 +431,7 @@ body {
 }
 
 .level-value {
-  font-size: 2.5rem;
+  font-size: 1.4rem;
   font-weight: 900;
   color: var(--neon-pink);
   text-shadow: var(--shadow-pink);
@@ -445,8 +445,8 @@ body {
 }
 
 .life-icon {
-  width: 24px;
-  height: 24px;
+  width: 14px;
+  height: 14px;
   background: var(--neon-pink);
   clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
   transition: all var(--transition-normal);
@@ -473,10 +473,10 @@ body {
 .canvas-wrapper {
   position: relative;
   width: 100%;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), var(--shadow-cyan);
-  border: 2px solid var(--border-glow);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), var(--shadow-cyan);
+  border: 1px solid var(--border-glow);
 }
 
 .game-canvas {
@@ -506,7 +506,7 @@ body {
 }
 
 .game-title {
-  font-size: 4rem;
+  font-size: 2.5rem;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -612,7 +612,7 @@ body {
 }
 
 .pause-title {
-  font-size: 3rem;
+  font-size: 2rem;
   color: var(--neon-gold);
   text-shadow: var(--shadow-gold);
   animation: pulse 2s infinite;
@@ -629,7 +629,7 @@ body {
 }
 
 .gameover-title {
-  font-size: 3.5rem;
+  font-size: 2.2rem;
   color: var(--neon-pink);
   text-shadow: var(--shadow-pink);
   text-transform: uppercase;
@@ -659,7 +659,7 @@ body {
 }
 
 .final-stat .value {
-  font-size: 2rem;
+  font-size: 1.4rem;
   font-weight: 700;
   font-family: "Rajdhani", monospace;
 }
@@ -1224,7 +1224,7 @@ body {
 /* ==================== LEADERBOARD ==================== */
 .leaderboard-container {
   width: 100%;
-  max-width: 900px;
+  max-width: 620px;
   background: var(--bg-panel);
   border: 1px solid var(--border-glow);
   border-radius: 16px;
@@ -1255,7 +1255,7 @@ body {
 }
 
 .cyber-title {
-  font-size: 2rem;
+  font-size: 1.4rem;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 3px;
@@ -1390,7 +1390,7 @@ body {
 
 .col-rank {
   font-weight: 900;
-  font-size: 1.3rem;
+  font-size: 1rem;
   text-align: center;
   font-family: "Rajdhani", sans-serif;
 }
@@ -1428,7 +1428,7 @@ body {
 
 .col-score {
   font-family: "Rajdhani", monospace;
-  font-size: 1.3rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--neon-cyan);
 }
@@ -1498,7 +1498,7 @@ body {
 /* ==================== MARKETPLACE ==================== */
 .marketplace-container {
   width: 100%;
-  max-width: 1100px;
+  max-width: 700px;
   background: var(--bg-panel);
   border: 1px solid var(--border-glow);
   border-radius: 16px;
@@ -1663,7 +1663,7 @@ body {
 }
 
 .ship-name {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #fff;
   margin-bottom: var(--space-xs);
@@ -1720,7 +1720,7 @@ body {
 }
 
 .price-amount {
-  font-size: 2rem;
+  font-size: 1.4rem;
   font-weight: 900;
   color: var(--neon-gold);
   font-family: "Rajdhani", monospace;
@@ -2219,7 +2219,7 @@ body {
 }
 
 .stat-pill .stat-value {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--neon-cyan);
   font-family: 'Rajdhani', monospace;
@@ -2244,7 +2244,7 @@ body {
 }
 
 .rank-number {
-  font-size: 2rem;
+  font-size: 1.4rem;
   font-weight: 900;
   color: var(--neon-cyan);
   line-height: 1;

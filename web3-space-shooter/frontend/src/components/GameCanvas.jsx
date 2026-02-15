@@ -74,8 +74,8 @@ export default function GameCanvas({ web3Data, selectedShip }) {
     // Set canvas size
     const resizeCanvas = () => {
       const container = canvas.parentElement;
-      canvas.width = Math.min(800, container.clientWidth - 40);
-      canvas.height = Math.min(600, window.innerHeight - 200);
+      canvas.width = Math.min(560, container.clientWidth - 16);
+      canvas.height = Math.min(380, window.innerHeight - 220);
     };
     
     resizeCanvas();
