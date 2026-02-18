@@ -2,9 +2,10 @@
 // Fill in contract addresses after deploying via Remix
 //
 // Deployment steps:
-//   1. Deploy BlockterGame (no constructor args) -> get BlockterGame address
-//   2. Deploy NFTSpaceship("https://your-api.com/ships/") -> get NFTSpaceship address
-//   3. Call blockterGame.setNFTContract(nftAddress)
+//   1. Deploy SpaceToken(walletAddress) -> get SpaceToken address
+//   2. Deploy SpaceShooterGame(tokenAddress) -> get SpaceShooterGame address
+//   3. Call spaceToken.setGameContract(gameAddress)
+//   4. Deploy NFTSpaceship() -> get NFTSpaceship address
 
 // Owner / Deployer wallet
 export const OWNER_ADDRESS = "0x7dD916dB8562F32349D132342139FF8C5A389Eb8";
@@ -12,43 +13,57 @@ export const OWNER_ADDRESS = "0x7dD916dB8562F32349D132342139FF8C5A389Eb8";
 export const CONTRACT_ADDRESSES = {
   // Shardeum EVM Testnet (Mezame)
   8119: {
-    BlockterGame: "0x245A0364AEf9A8ef6eC8E83aaEC1Cd08fBb7f878",
+    SpaceShooterGame: "0x4851214E850C29a6670bC2971019428089334F74",
+    SpaceToken: "0xAfa22964ACCe901DeBb5ec4a9c7E6d1F1159f673",
     NFTSpaceship: "",    // Fill after deploying NFTSpaceship
-    deployedAt: "2026-02-15"
+    deployedAt: "2026-02-17"
   }
 };
 
 // ============================================
-// BlockterGame ABI (ERC20 Token + Game Logic)
+// SpaceShooterGame ABI (Game Logic)
 // ============================================
 
-export const BlockterGameABI = [
-  // --- ERC20 Token ---
-  "function balanceOf(address) view returns (uint256)",
+export const SpaceShooterGameABI = [
+  // --- Game ---
+  "function submitScore(uint256 score) payable",
+  "function highScores(address) view returns (uint256)",
+  "function token() view returns (address)",
+  "function owner() view returns (address)",
+  "function MIN_SCORE() view returns (uint256)",
+  "function SUBMISSION_FEE() view returns (uint256)",
+  "function withdrawFees()"
+];
+
+// ============================================
+// SpaceToken ABI (ERC20 Token - separate contract)
+// ============================================
+
+export const SpaceTokenABI = [
+  // --- ERC20 Standard ---
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+  "function decimals() view returns (uint8)",
   "function totalSupply() view returns (uint256)",
+  "function balanceOf(address) view returns (uint256)",
   "function transfer(address to, uint256 amount) returns (bool)",
   "function approve(address spender, uint256 amount) returns (bool)",
   "function allowance(address owner, address spender) view returns (uint256)",
-  "function calculateReward(uint256 score, uint256 level, uint256 difficulty) pure returns (uint256)",
-  "function getTokenStats(address player) view returns (uint256 totalEarned, uint256 lastReward, uint256 balance, uint256 cooldownRemaining)",
+  "function transferFrom(address from, address to, uint256 amount) returns (bool)",
 
-  // --- Game ---
-  "function submitScore(uint32 score, uint16 level, uint8 difficulty, string playerName, bytes32 proof) payable returns (bool)",
-  "function getTopPlayers(uint256 count) view returns (address[] addrs, uint32[] scores, string[] names)",
-  "function getPlayerStats(address player) view returns (uint32 highScore, uint32 gamesPlayed, uint256 totalEarned, uint32 lastGame, string name, uint32 rank)",
-  "function verifyProof(bytes32 proof) view returns (bool valid, bool used)",
-  "function players(address) view returns (uint32 highScore, uint32 gamesPlayed, uint64 totalEarned, uint32 lastGameTime, string playerName)",
-  "function leaderboardLength() view returns (uint256)",
-  "function MIN_SCORE() view returns (uint256)",
-  "function SUBMISSION_FEE() view returns (uint256)",
-  "function nftContract() view returns (address)",
+  // --- SpaceToken Specific ---
+  "function INITIAL_SUPPLY() view returns (uint256)",
+  "function MAX_SUPPLY() view returns (uint256)",
+  "function gameContract() view returns (address)",
+  "function setGameContract(address _game)",
+  "function rewardPlayer(address player, uint256 amount)",
+  "function rescueERC20(address token, uint256 amount)",
+  "function pause()",
+  "function unpause()",
 
   // --- Events ---
-  "event PlayerRewarded(address indexed player, uint256 amount, uint256 score, uint256 timestamp)",
-  "event ScoreSubmitted(address indexed player, uint32 score, uint16 level, uint8 difficulty, uint256 reward, bytes32 indexed proof)",
-  "event NewHighScore(address indexed player, uint32 oldScore, uint32 newScore, uint32 rank)",
-  "event PlayerRegistered(address indexed player, string name)",
-  "event Transfer(address indexed from, address indexed to, uint256 value)"
+  "event Transfer(address indexed from, address indexed to, uint256 value)",
+  "event Approval(address indexed owner, address indexed spender, uint256 value)"
 ];
 
 // ============================================

@@ -153,8 +153,7 @@ export const useFirebaseLeaderboard = (web3Data) => {
     level,
     difficulty,
     playerName,
-    proof,
-    gameContract // Your deployed BlockterGame contract instance
+    gameContract // Your deployed SpaceShooterGame contract instance
   }) => {
     if (!web3Data?.signer || !gameContract) {
       throw new Error('Web3 not connected');
@@ -168,10 +167,7 @@ export const useFirebaseLeaderboard = (web3Data) => {
     const isNewHighScore = score > currentHigh;
 
     // Always calculate the reward amount for display
-    const baseReward = score * 0.001;
-    const levelMultiplier = 1 + (level - 1) * 0.1;
-    const difficultyBonus = (difficulty || 1) * 0.5;
-    const rewardAmount = baseReward * levelMultiplier * (1 + difficultyBonus);
+    const rewardAmount = score * 0.001; // matches contract: score * 1e15
 
     // Step 2: Submit to Firebase immediately (fast feedback)
     await submitScoreToFirebase({
@@ -192,10 +188,6 @@ export const useFirebaseLeaderboard = (web3Data) => {
 
         const tx = await gameContract.submitScore(
           score,
-          level,
-          difficulty,
-          playerName,
-          proof,
           { value: ethers.parseEther("0.001") } // SUBMISSION_FEE
         );
         
@@ -230,37 +222,18 @@ export const useFirebaseLeaderboard = (web3Data) => {
   }, [web3Data, submitScoreToFirebase, getPlayerStats]);
 
   // Sync blockchain data to Firebase (for admin/periodic sync)
+  // Note: The new SpaceShooterGame contract doesn't have getTopPlayers.
+  // This function is kept for future use but will need a different approach
+  // (e.g., indexing events) to sync on-chain data.
   const syncFromBlockchain = useCallback(async (gameContract, maxEntries = 100) => {
     setSyncStatus('syncing');
     setIsLoading(true);
 
     try {
-      const { ethers } = await import('ethers');
-
-      // Get on-chain leaderboard
-      const [addresses, scores, names] = await gameContract.getTopPlayers(maxEntries);
-      
-      const batch = writeBatch(db);
-      
-      for (let i = 0; i < addresses.length; i++) {
-        if (addresses[i] === ethers.ZeroAddress) continue;
-        
-        const ref = doc(db, LEADERBOARD_COLLECTION, addresses[i].toLowerCase());
-        batch.set(ref, {
-          address: addresses[i].toLowerCase(),
-          name: names[i] || 'Unknown',
-          score: Number(scores[i]),
-          rank: i + 1,
-          syncedFromChain: true,
-          syncedAt: serverTimestamp(),
-          verified: true
-        }, { merge: true });
-      }
-
-      await batch.commit();
+      // New contract doesn't have getTopPlayers - would need event indexing
+      console.warn('syncFromBlockchain: New contract does not support getTopPlayers. Use event indexing instead.');
       setSyncStatus('synced');
-      
-      return { success: true, count: addresses.length };
+      return { success: false, reason: 'getTopPlayers not available in new contract' };
     } catch (error) {
       console.error('Blockchain sync error:', error);
       setSyncStatus('error');
@@ -273,14 +246,12 @@ export const useFirebaseLeaderboard = (web3Data) => {
   // Verify a specific score exists on-chain
   const verifyScoreOnChain = useCallback(async (gameContract, address, expectedScore) => {
     try {
-      const stats = await gameContract.getPlayerStats(address);
-      const onChainScore = Number(stats.highScore);
+      const onChainScore = Number(await gameContract.highScores(address));
       
       return {
         matches: onChainScore === expectedScore,
         onChainScore,
-        expectedScore,
-        playerName: stats.name
+        expectedScore
       };
     } catch (error) {
       return { error: error.message };

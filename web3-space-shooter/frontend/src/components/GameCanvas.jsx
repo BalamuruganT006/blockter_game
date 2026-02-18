@@ -48,7 +48,8 @@ export default function GameCanvas({ web3Data, selectedShip }) {
       submitterRef.current = new ScoreSubmitter(contracts.game, web3Data.signer);
       rewarderRef.current = new RewardClaimer(
         contracts.game, 
-        web3Data.signer
+        web3Data.signer,
+        contracts.token || null
       );
       
       // Load player stats
@@ -61,7 +62,6 @@ export default function GameCanvas({ web3Data, selectedShip }) {
     const stats = await getPlayerStats(web3Data.account);
     if (stats) {
       setHighScore(stats.highScore);
-      setPlayerName(stats.playerName || '');
     }
   };
 
@@ -116,49 +116,49 @@ export default function GameCanvas({ web3Data, selectedShip }) {
   const handleGameOver = useCallback(async (finalScore, finalLevel, difficulty) => {
     setGameState('gameover');
     
-    // Immediately calculate and show the reward
-    const diff = difficulty || 1;
-    const baseReward = finalScore * 0.001;
-    const levelMultiplier = 1 + (finalLevel - 1) * 0.1;
-    const difficultyBonus = diff * 0.5;
-    const calculatedReward = baseReward * levelMultiplier * (1 + difficultyBonus);
+    // Immediately calculate and show the reward (matches contract: score * 1e15)
+    const calculatedReward = finalScore * 0.001;
+    const meetsMinScore = finalScore >= 100; // Contract MIN_SCORE = 100
     
     if (finalScore > 0) {
       // Show reward immediately (before blockchain confirmation)
       setLastReward({
         amount: parseFloat(calculatedReward.toFixed(6)),
         verified: false,
-        status: 'claiming'
+        status: meetsMinScore ? 'claiming' : 'below_min'
       });
     }
 
     if (!web3Data?.account || finalScore <= 0) return;
 
     try {
-      // Generate proof
-      const proof = ethers.keccak256(ethers.toUtf8Bytes(
-        `${web3Data.account}-${finalScore}-${Date.now()}`
-      ));
-
       const contracts = getContracts();
       const gameContract = contracts?.game || null;
 
       const result = await submitScoreHybrid({
         score: finalScore,
         level: finalLevel,
-        difficulty: diff,
+        difficulty: difficulty || 1,
         playerName: playerName || 'Anonymous',
-        proof,
         gameContract
       });
 
       // Update reward with blockchain confirmation
-      setLastReward({
-        amount: result.amount || parseFloat(calculatedReward.toFixed(6)),
-        verified: result.verified,
-        txHash: result.txHash,
-        status: result.verified ? 'confirmed' : 'submitted'
-      });
+      if (result.verified && meetsMinScore) {
+        setLastReward({
+          amount: result.amount || parseFloat(calculatedReward.toFixed(6)),
+          verified: true,
+          txHash: result.txHash,
+          status: 'confirmed'
+        });
+      } else {
+        setLastReward({
+          amount: parseFloat(calculatedReward.toFixed(6)),
+          verified: false,
+          txHash: result.txHash,
+          status: meetsMinScore ? 'submitted' : 'below_min'
+        });
+      }
 
       if (result.isNewHighScore) {
         setHighScore(finalScore);
@@ -169,7 +169,7 @@ export default function GameCanvas({ web3Data, selectedShip }) {
       setLastReward({
         amount: parseFloat(calculatedReward.toFixed(6)),
         verified: false,
-        status: 'pending'
+        status: meetsMinScore ? 'failed' : 'below_min'
       });
       // Fallback: submit to Firebase only
       try {
@@ -178,7 +178,7 @@ export default function GameCanvas({ web3Data, selectedShip }) {
           name: playerName || 'Anonymous',
           score: finalScore,
           level: finalLevel,
-          difficulty: diff,
+          difficulty: difficulty || 1,
           chainId: web3Data.chainId || 8119,
           isNewHighScore: finalScore > highScore
         });
@@ -223,10 +223,6 @@ export default function GameCanvas({ web3Data, selectedShip }) {
     setIsSubmitting(true);
     
     try {
-      const proof = ethers.keccak256(ethers.toUtf8Bytes(
-        `${web3Data?.account || 'anon'}-${scoreToSubmit}-${Date.now()}`
-      ));
-
       const contracts = getContracts();
 
       if (web3Data?.account && contracts?.game) {
@@ -236,13 +232,21 @@ export default function GameCanvas({ web3Data, selectedShip }) {
           level,
           difficulty: 1,
           playerName,
-          proof,
           gameContract: contracts.game
         });
 
-        const messages = ['✓ Firebase'];
-        if (result.verified) messages.push('⛓ Blockchain');
-        alert(`Score submitted! ${messages.join(' & ')}\n\nYour score has been recorded!`);
+        if (result.verified) {
+          // Blockchain confirmed — SPACE tokens minted to wallet
+          setLastReward(prev => ({
+            ...prev,
+            verified: true,
+            txHash: result.txHash,
+            status: 'confirmed'
+          }));
+          alert(`Score submitted! ✓ Firebase & ⛓ Blockchain\n\n+${(scoreToSubmit * 0.001).toFixed(4)} SPACE sent to your wallet!`);
+        } else {
+          alert('Score submitted to Firebase! (Blockchain submission skipped or failed)');
+        }
 
         if (result.isNewHighScore) setHighScore(scoreToSubmit);
       } else if (web3Data?.account) {
@@ -466,11 +470,19 @@ export default function GameCanvas({ web3Data, selectedShip }) {
               </div>
               {lastReward && lastReward.amount > 0 && (
                 <div className="final-stat reward">
-                  <span className="label">REWARD {lastReward.status === 'confirmed' ? 'CLAIMED' : lastReward.status === 'claiming' ? 'CLAIMING...' : 'EARNED'}</span>
+                  <span className="label">
+                    {lastReward.status === 'confirmed' ? 'REWARD CLAIMED' 
+                      : lastReward.status === 'claiming' ? 'REWARD CLAIMING...' 
+                      : lastReward.status === 'below_min' ? 'REWARD (NEED 100+ SCORE)'
+                      : lastReward.status === 'failed' ? 'REWARD FAILED'
+                      : 'REWARD EARNED'}
+                  </span>
                   <span className="value gold">+{parseFloat(lastReward.amount).toFixed(4)} SPACE</span>
-                  {lastReward.status === 'confirmed' && <span className="reward-check">&#10003; On-chain</span>}
+                  {lastReward.status === 'confirmed' && <span className="reward-check">&#10003; In your wallet</span>}
                   {lastReward.status === 'claiming' && <span className="reward-pending">&#9889; Processing</span>}
-                  {lastReward.status === 'pending' && <span className="reward-pending">&#9889; Pending</span>}
+                  {lastReward.status === 'below_min' && <span className="reward-pending">Score 100+ to earn SPACE</span>}
+                  {lastReward.status === 'failed' && <span className="reward-pending">&#9888; TX failed - try again</span>}
+                  {lastReward.status === 'submitted' && <span className="reward-pending">&#9889; Saved (Firebase only)</span>}
                 </div>
               )}
             </div>

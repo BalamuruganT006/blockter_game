@@ -1,6 +1,7 @@
 // src/hooks/useWeb3.js
 import { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
+import { CONTRACT_ADDRESSES } from '../contracts/addresses';
 
 const SHARDEUM_TESTNET = {
   chainId: '0x1FB7', // 8119 in hex
@@ -74,6 +75,26 @@ export const useWeb3 = () => {
       setSigner(newSigner);
       setAccount(accounts[0]);
       setChainId(Number(network.chainId));
+
+      // Prompt user to add SPACE token to MetaMask
+      const spaceTokenAddress = CONTRACT_ADDRESSES[Number(network.chainId)]?.SpaceToken;
+      if (spaceTokenAddress) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: spaceTokenAddress,
+                symbol: 'SPACE',
+                decimals: 18,
+              },
+            },
+          });
+        } catch (tokenErr) {
+          console.warn('User declined adding SPACE token:', tokenErr);
+        }
+      }
 
       // Listen for account changes
       window.ethereum.on('accountsChanged', handleAccountsChanged);

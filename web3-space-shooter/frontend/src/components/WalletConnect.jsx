@@ -1,6 +1,8 @@
 // src/components/WalletConnect.jsx
 import { useState, useEffect } from 'react';
 import { useWeb3 } from '../hooks/useWeb3';
+import { useGameContract } from '../hooks/useGameContract';
+import { OWNER_ADDRESS } from '../contracts/addresses';
 
 export default function WalletConnect({ onConnect }) {
   const {
@@ -18,13 +20,19 @@ export default function WalletConnect({ onConnect }) {
   } = useWeb3();
 
   const [balance, setBalance] = useState('0');
+  const [spaceBalance, setSpaceBalance] = useState('0');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [setupStatus, setSetupStatus] = useState(null); // null, 'checking', 'ok', 'needed', 'setting'
+
+  const { getTokenBalance, setupGameContract, checkGameSetup } = useGameContract(signer, chainId);
 
   // Update parent when connected
   useEffect(() => {
     if (account && signer) {
       onConnect({ provider, signer, account, chainId });
       updateBalance();
+      updateSpaceBalance();
+      runSetupCheck();
     } else {
       onConnect(null);
     }
@@ -33,6 +41,48 @@ export default function WalletConnect({ onConnect }) {
   const updateBalance = async () => {
     const bal = await getBalance();
     if (bal) setBalance(parseFloat(bal).toFixed(4));
+  };
+
+  const updateSpaceBalance = async () => {
+    if (!account) return;
+    try {
+      const bal = await getTokenBalance(account);
+      setSpaceBalance(parseFloat(bal).toFixed(2));
+    } catch (err) {
+      console.warn('Could not fetch SPACE balance:', err);
+    }
+  };
+
+  const runSetupCheck = async () => {
+    if (!account) return;
+    setSetupStatus('checking');
+    try {
+      const result = await checkGameSetup();
+      if (result?.configured) {
+        setSetupStatus('ok');
+      } else {
+        setSetupStatus('needed');
+        console.warn('Game setup needed:', result?.reason);
+      }
+    } catch (err) {
+      setSetupStatus('needed');
+    }
+  };
+
+  const handleSetupGame = async () => {
+    setSetupStatus('setting');
+    try {
+      const result = await setupGameContract();
+      if (result.success) {
+        setSetupStatus('ok');
+        alert(result.alreadySet
+          ? 'Game contract is already linked!'
+          : `Game contract linked! TX: ${result.txHash}`);
+      }
+    } catch (err) {
+      setSetupStatus('needed');
+      alert('Failed to link game contract: ' + (err.reason || err.message));
+    }
   };
 
   const handleConnect = async () => {
@@ -111,6 +161,7 @@ export default function WalletConnect({ onConnect }) {
             {account.slice(0, 6)}...{account.slice(-4)}
           </span>
           <span className="wallet-balance">{balance} SHM</span>
+          <span className="wallet-balance space-balance">{spaceBalance} SPACE</span>
         </div>
         
         <div className={`dropdown-arrow ${showDropdown ? 'open' : ''}`}>▼</div>
@@ -135,9 +186,19 @@ export default function WalletConnect({ onConnect }) {
             </button>
           )}
           
-          <button className="dropdown-item" onClick={updateBalance}>
+          <button className="dropdown-item" onClick={() => { updateBalance(); updateSpaceBalance(); }}>
             Refresh Balance
           </button>
+          
+          {/* Show setup button only for contract owner when setup is needed */}
+          {setupStatus === 'needed' && account?.toLowerCase() === OWNER_ADDRESS.toLowerCase() && (
+            <button className="dropdown-item warning" onClick={handleSetupGame}>
+              ⚠️ Link SPACE Token to Game
+            </button>
+          )}
+          {setupStatus === 'setting' && (
+            <span className="dropdown-item">Setting up...</span>
+          )}
           
           <a 
             className="dropdown-item"

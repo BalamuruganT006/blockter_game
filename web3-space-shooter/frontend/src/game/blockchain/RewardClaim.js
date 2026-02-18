@@ -2,37 +2,28 @@
 import { ethers } from 'ethers';
 
 export class RewardClaimer {
-  constructor(gameContract, signer) {
-    // BlockterGame is now both the token and game contract
+  constructor(gameContract, signer, tokenContract = null) {
+    // SpaceShooterGame handles game logic; SpaceToken handles ERC20 tokens
     this.gameContract = gameContract;
+    this.tokenContract = tokenContract || gameContract;
     this.signer = signer;
   }
 
-  // Calculate reward based on score and level
-  calculateReward(score, level, difficulty) {
-    // Base reward: 0.001 TOKEN per point
-    const baseReward = score * 0.001;
-    
-    // Level multiplier
-    const levelMultiplier = 1 + (level - 1) * 0.1;
-    
-    // Difficulty bonus
-    const difficultyBonus = difficulty * 0.5;
-    
-    // Calculate final amount in wei/token units
-    const finalReward = baseReward * levelMultiplier * (1 + difficultyBonus);
-    
-    return ethers.parseEther(finalReward.toFixed(18));
+  // Calculate reward based on score (matches contract: score * 1e15)
+  calculateReward(score) {
+    // Contract rewards: score * 1e15 wei = score * 0.001 TOKEN
+    const rewardInEther = score * 0.001;
+    return ethers.parseEther(rewardInEther.toFixed(18));
   }
 
-  async claimRewards(score, level, difficulty) {
+  async claimRewards(score) {
     try {
       // Check if contract is deployed and valid
       if (!this.gameContract || !this.gameContract.address || 
           this.gameContract.address === '0x...') {
         console.warn('Contracts not deployed, returning mock reward');
         
-        const mockReward = this.calculateReward(score, level, difficulty);
+        const mockReward = this.calculateReward(score);
         const mockAmountEther = ethers.formatEther(mockReward);
         
         return {
@@ -47,22 +38,22 @@ export class RewardClaimer {
 
       const address = await this.signer.getAddress();
       
-      // Check if already claimed for this game session
-      let currentStats;
+      // Check current high score
+      let currentHighScore;
       try {
-        currentStats = await this.gameContract.getPlayerStats(address);
+        currentHighScore = await this.gameContract.highScores(address);
       } catch (statsError) {
-        console.warn('Could not fetch stats, proceeding with reward claim:', statsError);
-        currentStats = null;
+        console.warn('Could not fetch high score, proceeding with reward claim:', statsError);
+        currentHighScore = null;
       }
       
       // Calculate reward
-      const rewardAmount = this.calculateReward(score, level, difficulty);
+      const rewardAmount = this.calculateReward(score);
       
       // Check contract token stats
       let contractBalance;
       try {
-        contractBalance = await this.gameContract.balanceOf(
+        contractBalance = await this.tokenContract.balanceOf(
           await this.gameContract.getAddress()
         );
       } catch (balanceError) {
@@ -77,16 +68,11 @@ export class RewardClaimer {
         };
       }
 
-      // Rewards are now auto-minted during submitScore in BlockterGame
-      // This is kept for checking reward status
-      const tx = await this.gameContract.getTokenStats(address);
-      
-      const receipt = await tx.wait();
-      
-      // Get current balance from the unified contract
+      // Rewards are auto-minted during submitScore in SpaceShooterGame
+      // Get current balance from SpaceToken contract
       let newBalance;
       try {
-        newBalance = await this.gameContract.balanceOf(address);
+        newBalance = await this.tokenContract.balanceOf(address);
       } catch (newBalanceError) {
         newBalance = rewardAmount;
       }
@@ -110,14 +96,12 @@ export class RewardClaimer {
   // Check available rewards without claiming
   async checkPendingRewards(address) {
     try {
-      const stats = await this.gameContract.getPlayerStats(address);
-      const balance = await this.gameContract.balanceOf(address);
+      const highScore = await this.gameContract.highScores(address);
+      const balance = await this.tokenContract.balanceOf(address);
       
       return {
-        gamesPlayed: Number(stats.gamesPlayed),
-        totalEarned: ethers.formatEther(stats.totalEarned),
         currentBalance: ethers.formatEther(balance),
-        highScore: Number(stats.highScore)
+        highScore: Number(highScore)
       };
     } catch (error) {
       return { error: error.message };

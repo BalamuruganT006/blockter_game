@@ -32,28 +32,28 @@ export class ScoreSubmitter {
       const address = await this.signer.getAddress();
       
       try {
-        const currentStats = await this.contract.getPlayerStats(address);
+        const currentHighScore = await this.contract.highScores(address);
         
-        if (score <= Number(currentStats.highScore)) {
+        if (score <= Number(currentHighScore)) {
           return {
             success: false,
             reason: 'Not a new high score',
-            currentHighScore: Number(currentStats.highScore)
+            currentHighScore: Number(currentHighScore)
           };
         }
       } catch (statsError) {
-        console.warn('Could not fetch current stats, allowing submission:', statsError);
+        console.warn('Could not fetch current high score, allowing submission:', statsError);
         // Allow submission if stats can't be fetched
       }
 
       // Prepare transaction
       const txOptions = {
-        gasLimit: options.gasLimit || 200000,
-        value: options.value || 0
+        gasLimit: options.gasLimit || 300000,
+        value: options.value || ethers.parseEther("0.001") // SUBMISSION_FEE
       };
 
-      // Submit to blockchain
-      const tx = await this.contract.submitScore(score, playerName, txOptions);
+      // Submit to blockchain - new contract only takes score
+      const tx = await this.contract.submitScore(score, txOptions);
       
       // Wait for confirmation
       const receipt = await tx.wait();
