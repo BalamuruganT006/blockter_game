@@ -1,10 +1,17 @@
 // src/components/AuthModal.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import '../styles/auth.css';
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onSuccess }) {
   const [isSignUp, setIsSignUp] = useState(initialMode === 'signup');
+
+  // Sync mode when modal opens with different mode
+  useEffect(() => {
+    if (isOpen) {
+      setIsSignUp(initialMode === 'signup');
+    }
+  }, [isOpen, initialMode]);
   const [formData, setFormData] = useState({
     displayName: '',
     email: '',

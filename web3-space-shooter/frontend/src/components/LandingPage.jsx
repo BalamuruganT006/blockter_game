@@ -123,7 +123,7 @@ export default function LandingPage({ onEnterGame }) {
       <div 
         className="scroll-progress"
         style={{ 
-          transform: `scaleX(${Math.min(scrollY / (document.body.scrollHeight - window.innerHeight), 1)})` 
+          transform: `scaleX(${typeof document !== 'undefined' ? Math.min(scrollY / (document.body.scrollHeight - window.innerHeight || 1), 1) : 0})` 
         }}
       />
     </div>

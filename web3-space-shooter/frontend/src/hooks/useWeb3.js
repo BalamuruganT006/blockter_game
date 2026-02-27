@@ -97,9 +97,19 @@ export const useWeb3 = () => {
       }
 
       // Listen for account changes
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      window.ethereum.on('chainChanged', handleChainChanged);
-      window.ethereum.on('disconnect', handleDisconnect);
+      window.ethereum.on('accountsChanged', (accounts) => {
+        if (accounts.length === 0) {
+          setProvider(null);
+          setSigner(null);
+          setAccount(null);
+          setChainId(null);
+        } else {
+          setAccount(accounts[0]);
+        }
+      });
+      window.ethereum.on('chainChanged', () => {
+        window.location.reload();
+      });
 
     } catch (err) {
       setError(err.message || 'Failed to connect wallet');
@@ -116,27 +126,11 @@ export const useWeb3 = () => {
     setChainId(null);
     
     if (window.ethereum) {
-      window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-      window.ethereum.removeListener('chainChanged', handleChainChanged);
-      window.ethereum.removeListener('disconnect', handleDisconnect);
+      window.ethereum.removeAllListeners('accountsChanged');
+      window.ethereum.removeAllListeners('chainChanged');
+      window.ethereum.removeAllListeners('disconnect');
     }
   }, []);
-
-  const handleAccountsChanged = (accounts) => {
-    if (accounts.length === 0) {
-      disconnectWallet();
-    } else {
-      setAccount(accounts[0]);
-    }
-  };
-
-  const handleChainChanged = () => {
-    window.location.reload();
-  };
-
-  const handleDisconnect = () => {
-    disconnectWallet();
-  };
 
   const getBalance = useCallback(async () => {
     if (!provider || !account) return null;
