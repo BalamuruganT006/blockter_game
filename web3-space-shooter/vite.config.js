@@ -27,14 +27,8 @@ export default defineConfig({
     build: {
         outDir: resolve(__dirname, "dist"),
         emptyOutDir: true,
-        sourcemap: true,
-        minify: "terser",
-        terserOptions: {
-            compress: {
-                drop_console: true,
-                drop_debugger: true
-            }
-        },
+        sourcemap: false,
+        minify: "esbuild",
         rollupOptions: {
             output: {
                 manualChunks: {

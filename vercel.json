@@ -1,0 +1,9 @@
+{
+  "buildCommand": "vite build --config web3-space-shooter/vite.config.js",
+  "outputDirectory": "web3-space-shooter/dist",
+  "installCommand": "pnpm install",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
