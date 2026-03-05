@@ -58,7 +58,7 @@ export default function Footer({ onEnterGame, isAuthenticated, onOpenAuth }) {
       </div>
 
       <div className="footer-bottom">
-        <p>© 2024 Space Shooter. Powered by Shardeum.</p>
+        <p>© 2026 Space Shooter. Powered by Shardeum.</p>
         <div className="footer-badges">
           <span className="badge">🔒 Audited</span>
           <span className="badge">⛓ On-Chain</span>
