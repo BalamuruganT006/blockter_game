@@ -2,29 +2,43 @@
 
 const teamMembers = [
   {
-    name: 'Alex Chen',
+    name: 'Balamurugan T',
     role: 'Game Director',
     avatar: '👨‍🚀',
     color: '#00f3ff'
   },
   {
-    name: 'Sarah Kim',
+    name: 'Balamurugan T',
     role: 'Lead Developer',
     avatar: '👩‍💻',
     color: '#ff0055'
   },
+  
   {
-    name: 'Mike Ross',
-    role: 'Blockchain Engineer',
+    name: 'Balamurugan T',
+    role: 'Blockchain ',
     avatar: '⛓',
     color: '#ffd700'
   },
   {
-    name: 'Emma Wilson',
+    name: 'Akilan',
     role: 'Art Director',
     avatar: '🎨',
-    color: '#9d4edd'
+    color: '#ff6b6b'
+  },
+  {
+    name: 'Kiruthikkailash',
+    role: 'Developer',
+    avatar: '💻',
+    color: '#4cc9f0'
+  },
+  {
+    name: 'krishnakumar',
+    role: 'Developer',
+    avatar: '👾',
+    color: '#7209b7'
   }
+  
 ];
 
 export default function TeamSection() {
