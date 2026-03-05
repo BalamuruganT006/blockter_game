@@ -3,22 +3,9 @@
 const teamMembers = [
   {
     name: 'Balamurugan T',
-    role: 'Game Director',
-    avatar: '👨‍🚀',
+    role: 'Game Director & Lead Developer & Blockchain',
+    avatar: '👨‍🚀👩‍💻⛓',
     color: '#00f3ff'
-  },
-  {
-    name: 'Balamurugan T',
-    role: 'Lead Developer',
-    avatar: '👩‍💻',
-    color: '#ff0055'
-  },
-  
-  {
-    name: 'Balamurugan T',
-    role: 'Blockchain ',
-    avatar: '⛓',
-    color: '#ffd700'
   },
   {
     name: 'Akilan',
