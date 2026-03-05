@@ -4,7 +4,7 @@ const teamMembers = [
   {
     name: 'Balamurugan T',
     role: 'Game Director & Lead Developer & Blockchain',
-    avatar: '👨‍🚀👩‍💻⛓',
+    avatar: '👩‍💻',
     color: '#00f3ff'
   },
   {
@@ -22,7 +22,7 @@ const teamMembers = [
   {
     name: 'krishnakumar',
     role: 'Developer',
-    avatar: '👾',
+    avatar: '💻',
     color: '#7209b7'
   }
   
